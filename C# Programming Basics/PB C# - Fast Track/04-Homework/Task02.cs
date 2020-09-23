@@ -1,0 +1,31 @@
+using System;
+
+namespace Practice
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string type = Console.ReadLine();
+            int rows = int.Parse(Console.ReadLine());
+            int cols = int.Parse(Console.ReadLine());
+
+            double price = 0.0;
+
+            if (type == "Premiere")
+            {
+                price = 12.00;
+            }
+            else if (type == "Normal")
+            {
+                price = 7.50;
+            }
+            else
+            {
+                price = 5.00;
+            }
+
+            Console.WriteLine("{0:F2}", (rows * cols * price));
+        }
+    }
+}
