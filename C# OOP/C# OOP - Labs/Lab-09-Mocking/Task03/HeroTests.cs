@@ -1,0 +1,35 @@
+﻿using FakeAxeAndDummy.Contracts;
+using FakeAxeAndDummy.Fakes;
+using Moq;
+using NUnit.Framework;
+
+namespace FakeAxeAndDummy
+{
+    [TestFixture]
+    public class HeroTests
+    {
+        private Mock<IAttackable> fakeTarget;
+
+        [SetUp]
+        public void SetUp()
+        {
+            fakeTarget = new Mock<IAttackable>();
+            fakeTarget.Setup(t => t.GiveExperience()).Returns(20);
+            fakeTarget.Setup(t => t.IsDead()).Returns(true);
+        }
+
+        [Test]
+        public void GivenHero_WhenAttackedTargetDies_ThenHeroReceivesExperience()
+        {
+            Mock<IWeapon> fakeWeapon = new Mock<IWeapon>();
+
+            Hero hero = new Hero("Hero", fakeWeapon.Object);
+
+            hero.Attack(fakeTarget.Object);
+
+            Assert.AreEqual(20, hero.Experience);
+        }
+
+
+    }
+}
