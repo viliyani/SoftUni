@@ -1,0 +1,5 @@
+In this exercise we had only a video tutorial about techniques for debugging.
+
+There are not given coding tasks for this exercise.
+
+This folder is existing just to not mess up my folders order.
