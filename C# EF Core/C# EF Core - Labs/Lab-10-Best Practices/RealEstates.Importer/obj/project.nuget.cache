@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "EhrTmA8eTU1i9iFY3Tinf6ZHf/Pt8nkD7lJPGqCrP4/hF1VqR/mg5KTRU04Ks/cY9bArpBjk/DX0FJ5CyvjEqw==",
+  "dgSpecHash": "mTN+F19r/Ky+DZCnyBsk+4lv2TxPsNbtNNilWBnyW9WA0S4EIwzLcBRY+GrU0/tbepe4jPowGQClnhWWGphOAA==",
   "success": true,
   "projectFilePath": "C:\\Users\\teakk\\source\\repos\\RealEstates\\RealEstates.Importer\\RealEstates.Importer.csproj",
   "expectedPackageFiles": [
@@ -89,6 +89,7 @@
     "C:\\Users\\teakk\\.nuget\\packages\\system.text.encoding\\4.3.0\\system.text.encoding.4.3.0.nupkg.sha512",
     "C:\\Users\\teakk\\.nuget\\packages\\system.text.encoding.codepages\\4.7.0\\system.text.encoding.codepages.4.7.0.nupkg.sha512",
     "C:\\Users\\teakk\\.nuget\\packages\\system.text.encoding.extensions\\4.3.0\\system.text.encoding.extensions.4.3.0.nupkg.sha512",
+    "C:\\Users\\teakk\\.nuget\\packages\\system.text.json\\5.0.1\\system.text.json.5.0.1.nupkg.sha512",
     "C:\\Users\\teakk\\.nuget\\packages\\system.text.regularexpressions\\4.3.0\\system.text.regularexpressions.4.3.0.nupkg.sha512",
     "C:\\Users\\teakk\\.nuget\\packages\\system.threading\\4.3.0\\system.threading.4.3.0.nupkg.sha512",
     "C:\\Users\\teakk\\.nuget\\packages\\system.threading.tasks\\4.3.0\\system.threading.tasks.4.3.0.nupkg.sha512",
