@@ -9,6 +9,8 @@ namespace RealEstates.Services
             int floor, int maxFloors, int size, int yardSize, 
             int year, string propertyType, string buildingType);
 
+        IEnumerable<PropertyInfoFullDataDto> GetFullData(int count = 10);
+
         IEnumerable<PropertyInfoDto> Search(int minPrice, int maxPrice, int minSize, int maxSize);
 
         decimal AveragePricePerSquareMeter(int districtId);

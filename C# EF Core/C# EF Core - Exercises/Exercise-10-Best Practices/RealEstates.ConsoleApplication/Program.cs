@@ -2,8 +2,12 @@
 using RealEstates.Data;
 using RealEstates.Models;
 using RealEstates.Services;
+using RealEstates.Services.Models;
 using System;
+using System.IO;
+using System.Linq;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace RealEstates.ConsoleApplication
 {
@@ -25,6 +29,7 @@ namespace RealEstates.ConsoleApplication
                 Console.WriteLine("2. Most expensive districts");
                 Console.WriteLine("4. Add Tag");
                 Console.WriteLine("5. Bulk Tag to Properties");
+                Console.WriteLine("6. Export to XML");
                 Console.WriteLine("0. EXIT");
 
                 bool parsed = int.TryParse(Console.ReadLine(), out int option);
@@ -34,7 +39,7 @@ namespace RealEstates.ConsoleApplication
                     break;
                 }
 
-                if (parsed && option >= 1 && option <= 5)
+                if (parsed && option >= 1 && option <= 6)
                 {
                     switch (option)
                     {
@@ -50,6 +55,9 @@ namespace RealEstates.ConsoleApplication
                         case 5:
                             BulkTagToProperties(db);
                             break;
+                        case 6:
+                            PropertiesFullInfo(db);
+                            break;
                     }
 
                     Console.WriteLine("Press any key to continue...");
@@ -59,11 +67,30 @@ namespace RealEstates.ConsoleApplication
             }
         }
 
+        private static void PropertiesFullInfo(ApplicationDbContext db)
+        {
+            Console.WriteLine("Count of properties:");
+            int count = int.Parse(Console.ReadLine());
+
+            IPropertiesService propertiesService = new PropertiesService(db);
+            var result = propertiesService.GetFullData(count).ToArray();
+
+            var xmlSerializer = new XmlSerializer(typeof(PropertyInfoFullDataDto[]));
+            var stringWriter = new StringWriter();
+            xmlSerializer.Serialize(stringWriter, result);
+
+
+            Console.WriteLine(stringWriter.ToString().TrimEnd());
+        }
+
         private static void BulkTagToProperties(ApplicationDbContext db)
         {
             Console.WriteLine("Bulk operation started!");
-            ITagsService tagsService = new TagsService(db);
+
+            IPropertiesService propertiesService = new PropertiesService(db);
+            ITagsService tagsService = new TagsService(db, propertiesService);
             tagsService.BulkTagToProperties();
+
             Console.WriteLine("Bulk operation finished!");
         }
 
@@ -75,7 +102,8 @@ namespace RealEstates.ConsoleApplication
             Console.WriteLine("Importance:");
             int tagImportance = int.Parse(Console.ReadLine());
 
-            ITagsService tagsService = new TagsService(db);
+            IPropertiesService propertiesService = new PropertiesService(db);
+            ITagsService tagsService = new TagsService(db, propertiesService);
             tagsService.Add(tagName, tagImportance);
         }
 

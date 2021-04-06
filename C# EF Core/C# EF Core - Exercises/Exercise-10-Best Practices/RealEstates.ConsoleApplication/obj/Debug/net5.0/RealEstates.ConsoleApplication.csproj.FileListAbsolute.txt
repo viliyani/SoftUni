@@ -67,3 +67,4 @@ C:\Users\teakk\source\repos\RealEstates\RealEstates.ConsoleApplication\obj\Debug
 C:\Users\teakk\source\repos\RealEstates\RealEstates.ConsoleApplication\obj\Debug\net5.0\ref\RealEstates.ConsoleApplication.dll
 C:\Users\teakk\source\repos\RealEstates\RealEstates.ConsoleApplication\obj\Debug\net5.0\RealEstates.ConsoleApplication.pdb
 C:\Users\teakk\source\repos\RealEstates\RealEstates.ConsoleApplication\obj\Debug\net5.0\RealEstates.ConsoleApplication.genruntimeconfig.cache
+C:\Users\teakk\source\repos\RealEstates\RealEstates.ConsoleApplication\bin\Debug\net5.0\AutoMapper.dll

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace RealEstates.Services
 {
-    public class TagsService : ITagsService
+    public class TagsService : BaseService, ITagsService
     {
         private readonly ApplicationDbContext dbContext;
         private readonly IPropertiesService propertiesService;
@@ -37,20 +37,41 @@ namespace RealEstates.Services
                 var averagePriceForDistrict = this.propertiesService
                     .AveragePricePerSquareMeter(property.DistrictId);
 
+                // expensive/cheap property tags
+
                 if (property.Price > averagePriceForDistrict)
                 {
-                    var tag = dbContext.Tags.FirstOrDefault(x => x.Name == "скъп-имот");
+                    var tag = GetTag("скъп-имот");
                     property.Tags.Add(tag);
                 }
                 else if (property.Price < averagePriceForDistrict)
                 {
-                    var tag = dbContext.Tags.FirstOrDefault(x => x.Name == "евтин-имот");
+                    var tag = GetTag("евтин-имот");
+                    property.Tags.Add(tag);
+                }
+
+                // old/new property tags
+                var date15YearsAgo = DateTime.Now.AddYears(-15);
+
+                if (property.Year.HasValue && property.Year <= date15YearsAgo.Year)
+                {
+                    Tag tag = GetTag("стар-имот");
+                    property.Tags.Add(tag);
+                }
+                else if (property.Year.HasValue && property.Year > date15YearsAgo.Year)
+                {
+                    Tag tag = GetTag("нов-имот");
                     property.Tags.Add(tag);
                 }
             }
 
             dbContext.SaveChanges();
 
+        }
+
+        private Tag GetTag(string tagName)
+        {
+            return dbContext.Tags.FirstOrDefault(x => x.Name == tagName);
         }
     }
 }
