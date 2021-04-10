@@ -16,40 +16,30 @@ namespace Quiz.Services
             this.applicationDbContext = applicationDbContext;
         }
 
-        public void AddUserAnswer(string userId, int answerId)
+        public void AddUserAnswer(string userName, int questionId, int answerId)
         {
-            var userAnswer = new UserAnswer
-            {
-                IdentityUserId = userId,
-                AnswerId = answerId
-            };
+            var userId = applicationDbContext.Users
+                .Where(x => x.UserName == userName)
+                .Select(x => x.Id)
+                .FirstOrDefault();
 
-            this.applicationDbContext.UserAnswers.Add(userAnswer);
+            var userAnswer = applicationDbContext
+                .UserAnswers
+                .FirstOrDefault(x=>x.IdentityUserId == userId
+                    && x.QuestionId == questionId);
+
+            userAnswer.AnswerId = answerId;
+
             this.applicationDbContext.SaveChanges();
         }
 
-        public void BulkAddUserAnswer(QuizInputModel quizInputModel)
+        public int GetUserResult(string userName, int quizId)
         {
-            var userAnswers = new List<UserAnswer>();
+            var userId = applicationDbContext.Users
+                .Where(x => x.UserName == userName)
+                .Select(x => x.Id)
+                .FirstOrDefault();
 
-            foreach (var item in quizInputModel.Questions)
-            {
-                var userAnswer = new UserAnswer
-                {
-                    IdentityUserId = quizInputModel.UserId,
-                    AnswerId = item.AnswerId,
-                    QuestionId = item.QuestionId
-                };
-
-                userAnswers.Add(userAnswer);
-            }
-
-            this.applicationDbContext.AddRange(userAnswers);
-            this.applicationDbContext.SaveChanges();
-        }
-
-        public int GetUserResult(string userId, int quizId)
-        {
             var totalPoints = this.applicationDbContext.UserAnswers
                 .Where(x => x.IdentityUserId == userId 
                         && x.Question.QuizId == quizId)

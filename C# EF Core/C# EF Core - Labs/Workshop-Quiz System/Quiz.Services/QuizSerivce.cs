@@ -2,16 +2,18 @@
 using Quiz.Data;
 using Quiz.Services.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using Quiz.Models;
 
 namespace Quiz.Services
 {
     public class QuizSerivce : IQuizService
     {
-        private readonly ApplicationDbContext applicationDbContext;
+        private readonly ApplicationDbContext db;
 
-        public QuizSerivce(ApplicationDbContext applicationDbContext)
+        public QuizSerivce(ApplicationDbContext db)
         {
-            this.applicationDbContext = applicationDbContext;
+            this.db = db;
         }
 
         public int Add(string title)
@@ -21,15 +23,15 @@ namespace Quiz.Services
                 Title = title
             };
 
-            this.applicationDbContext.Quizes.Add(quiz);
-            this.applicationDbContext.SaveChanges();
+            this.db.Quizes.Add(quiz);
+            this.db.SaveChanges();
 
             return quiz.Id;
         }
 
         public QuizViewModel GetQuizById(int quizId)
         {
-            var quiz = this.applicationDbContext.Quizes
+            var quiz = this.db.Quizes
                 .Include(x => x.Questions)
                 .ThenInclude(x => x.Answers)
                 .FirstOrDefault(x => x.Id == quizId);
@@ -53,6 +55,81 @@ namespace Quiz.Services
             };
 
             return quizViewModel;
+        }
+
+        public IEnumerable<UserQuizViewModel> GetQuizesByUserName(string userName)
+        {
+            var quizes = db
+                 .Quizes
+                 .Select(x => new UserQuizViewModel
+                 {
+                     QuizId = x.Id,
+                     Title = x.Title,
+                 })
+                 .ToList();
+
+            foreach (var quiz in quizes)
+            {
+                var questionsCount = db
+                    .UserAnswers
+                    .Count(ua => ua.IdentityUser.UserName == userName
+                                && ua.Question.QuizId == quiz.QuizId);
+
+                if (questionsCount == 0)
+                {
+                    quiz.Status = QuizStatus.NotStarted;
+                    continue;
+                }
+
+                var answeredQuestions = db
+                    .UserAnswers
+                    .Count(ua => ua.IdentityUser.UserName == userName
+                                && ua.Question.QuizId == quiz.QuizId
+                                && ua.AnswerId.HasValue);
+
+                if (answeredQuestions == questionsCount)
+                {
+                    quiz.Status = QuizStatus.Finished;
+                }
+                else
+                {
+                    quiz.Status = QuizStatus.InProgress;
+                }
+
+            }
+
+            return quizes;
+        }
+
+        public void StartQuiz(string userName, int quizId)
+        {
+            if (db.UserAnswers.Any(x => x.IdentityUser.UserName == userName
+                    && x.Question.Quiz.Id == quizId))
+            {
+                return;
+            }
+
+            var userId = db.Users
+                .Where(x => x.UserName == userName)
+                .Select(x => x.Id)
+                .FirstOrDefault();
+
+            var questions = db.Questions
+                .Where(x => x.QuizId == quizId)
+                .Select(x => new { x.Id })
+                .ToList();
+
+            foreach (var question in questions)
+            {
+                db.UserAnswers.Add(new UserAnswer
+                {
+                    AnswerId = null,
+                    IdentityUserId = userId,
+                    QuestionId = question.Id
+                });
+            }
+
+            db.SaveChanges();
         }
     }
 }
