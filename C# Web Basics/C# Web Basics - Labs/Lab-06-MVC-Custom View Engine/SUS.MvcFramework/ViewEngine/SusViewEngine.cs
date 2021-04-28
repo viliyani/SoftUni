@@ -15,7 +15,7 @@ namespace SUS.MvcFramework.ViewEngine
     {
         public string GetHtml(string templateCode, object viewModel)
         {
-            string csharpCode = GenerateCSharpFromTemplate(templateCode);
+            string csharpCode = GenerateCSharpFromTemplate(templateCode, viewModel);
 
             IView executableObject = GenerateExecutableCode(csharpCode, viewModel);
             string html = executableObject.ExecuteTemplate(viewModel);
@@ -24,8 +24,24 @@ namespace SUS.MvcFramework.ViewEngine
         }
 
 
-        private string GenerateCSharpFromTemplate(string templateCode)
+        private string GenerateCSharpFromTemplate(string templateCode, object viewModel)
         {
+            string typeOfModel = "object";
+            if (viewModel != null)
+            {
+                if (viewModel.GetType().IsGenericType)
+                {
+                    var modelName = viewModel.GetType().FullName;
+                    var genericArguments = viewModel.GetType().GenericTypeArguments;
+                    typeOfModel = modelName.Substring(0, modelName.IndexOf('`'))
+                        + "<" + string.Join(",", genericArguments.Select(x => x.FullName)) + ">";
+                }
+                else
+                {
+                    typeOfModel = viewModel.GetType().FullName;
+                }
+            }
+
             string csharpCode = @"
 using System;
 using System.Text;
@@ -39,11 +55,12 @@ namespace ViewNamespace
     {
         public string ExecuteTemplate(object viewModel)
         {
+            " + typeOfModel + @" Model = (" + typeOfModel + @")viewModel;
             var html = new StringBuilder();
 
             " + GetMethodBody(templateCode) + @"
 
-            return html.ToString();
+            return html.ToString().TrimEnd();
         }
     }
 }
@@ -55,7 +72,7 @@ namespace ViewNamespace
         private string GetMethodBody(string templateCode)
         {
             var supportedOperators = new List<string> { "for", "while", "if", "else", "foreach" };
-            Regex csharpCodeRegex = new Regex(@"[^\""\s&\'\<]");
+            Regex csharpCodeRegex = new Regex(@"[^\""\s&\'\<]+");
 
 
             StringBuilder sb = new StringBuilder();
@@ -85,18 +102,16 @@ namespace ViewNamespace
                     {
                         var atSignLocation = line.IndexOf("@");
                         var htmlBeforeAtSign = line.Substring(0, atSignLocation);
-                        sb.Append(htmlBeforeAtSign + "\" + ");
+                        sb.Append(htmlBeforeAtSign.Replace("\"", "\"\"") + "\" + ");
 
                         var lineAfterAtSign = line.Substring(atSignLocation + 1);
                         var code = csharpCodeRegex.Match(lineAfterAtSign).Value;
-                        sb.Append(code + " + \"");
+                        sb.Append(code + " + @\"");
 
                         line = lineAfterAtSign.Substring(code.Length);
                     }
 
-                    sb.AppendLine($"html.AppendLine(@\"{line.Replace("\"", "\"\"")}\");");
-
-                    sb.AppendLine("\");");
+                    sb.AppendLine(line.Replace("\"", "\"\"") + "\");");
                 }
             }
 
