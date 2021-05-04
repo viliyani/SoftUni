@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace SUS.MvcFramework
@@ -12,12 +13,14 @@ namespace SUS.MvcFramework
         public static async Task CreateHostAsync(IMvcApplication application, int port)
         {
             List<Route> routeTable = new List<Route>();
+            IServiceCollection serviceCollection = new ServiceCollection();
 
             AutoRegisterStaticFiles(routeTable);
-            AutoRegisterRoutes(routeTable, application);
 
-            application.ConfigureServices();
+            application.ConfigureServices(serviceCollection);
             application.Configure(routeTable);
+
+            AutoRegisterRoutes(routeTable, application, serviceCollection);
 
             Console.WriteLine("All Registered Routes:");
             foreach (var route in routeTable)
@@ -86,7 +89,7 @@ namespace SUS.MvcFramework
             }
         }
 
-        private static void AutoRegisterRoutes(List<Route> routeTable, IMvcApplication application)
+        private static void AutoRegisterRoutes(List<Route> routeTable, IMvcApplication application, IServiceCollection serviceCollection)
         {
             // routeTable.Add(new Route("/cards/all", HttpMethod.Get, new CardsController().All));
 
@@ -120,14 +123,7 @@ namespace SUS.MvcFramework
                         url = attribute.Url;
                     }
 
-                    routeTable.Add(new Route(url, httpMethod, (request) =>
-                    {
-                        var instance = Activator.CreateInstance(controllerType) as Controller;
-                        instance.Request = request;
-                        var response = method.Invoke(instance, new object[] { }) as HttpResponse;
-
-                        return response;
-                    }));
+                    routeTable.Add(new Route(url, httpMethod, request => ExecuteAction(request, controllerType, method, serviceCollection)));
 
                     Console.WriteLine(" - " + url);
                 }
@@ -135,6 +131,58 @@ namespace SUS.MvcFramework
 
             }
 
+        }
+
+        private static HttpResponse ExecuteAction(HttpRequest request, Type controllerType, MethodInfo action, IServiceCollection serviceCollection)
+        {
+            var instance = serviceCollection.CreateInstance(controllerType) as Controller;
+            instance.Request = request;
+
+            var arguments = new List<object>();
+            var parameters = action.GetParameters();
+            foreach (var parameter in parameters)
+            {
+                var httpParameterValue = GetParameterFromRequest(request, parameter.Name);
+                var parameterValue = Convert.ChangeType(httpParameterValue, parameter.ParameterType);
+
+                if (parameterValue == null && parameter.ParameterType != typeof(string))
+                {
+                    // complex type
+                    parameterValue = Activator.CreateInstance(parameter.ParameterType);
+                    var properties = parameter.ParameterType.GetProperties();
+                    foreach (var property in properties)
+                    {
+                        var propertyHttpParameterValue = GetParameterFromRequest(request, parameter.Name);
+                        var propertyParameterValue = Convert.ChangeType(propertyHttpParameterValue, property.PropertyType);
+                        property.SetValue(parameterValue, propertyParameterValue);
+                    }
+                }
+
+                arguments.Add(parameterValue);
+            }
+
+            var response = action.Invoke(instance, arguments.ToArray()) as HttpResponse;
+
+            return response;
+        }
+
+        private static string GetParameterFromRequest(HttpRequest request, string parameterName)
+        {
+            parameterName = parameterName.ToLower();
+
+            if (request.FormData.Any(x => x.Key.ToLower() == parameterName))
+            {
+                return request.FormData
+                    .FirstOrDefault(x => x.Key.ToLower() == parameterName).Value;
+            }
+
+            if (request.QueryData.Any(x => x.Key.ToLower() == parameterName))
+            {
+                return request.QueryData
+                    .FirstOrDefault(x => x.Key.ToLower() == parameterName).Value;
+            }
+
+            return null;
         }
     }
 }

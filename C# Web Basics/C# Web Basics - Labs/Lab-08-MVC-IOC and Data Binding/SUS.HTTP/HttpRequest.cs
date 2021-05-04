@@ -15,6 +15,7 @@ namespace SUS.HTTP
             Headers = new List<Header>();
             Cookies = new List<Cookie>();
             FormData = new Dictionary<string, string>();
+            QueryData = new Dictionary<string, string>();
 
             var lines = requestString.Split(new string[] { HttpConstants.NewLine }, StringSplitOptions.None);
 
@@ -79,25 +80,44 @@ namespace SUS.HTTP
                 Session = Sessions[sessionCookie.Value];
             }
 
-            Body = sb.ToString();
+            if (Path.Contains("?"))
+            {
+                var pathParts = Path.Split(new char[] { '?' }, 2);
+                Path = pathParts[0];
+                QueryString = pathParts[1];
+            }
 
-            var parameters = Body.Split(new char[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
+            Body = sb.ToString().TrimEnd('\n', '\r');
+
+            SplitParameters(Body, FormData);
+
+            if (QueryString != null)
+            {
+                SplitParameters(QueryString, QueryData);
+            }
+        }
+
+        private static void SplitParameters(string parametersAsString, Dictionary<string, string> output)
+        {
+            var parameters = parametersAsString.Split(new char[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var parameter in parameters)
             {
-                var parameterParts = parameter.Split('=');
+                var parameterParts = parameter.Split(new char[] { '=' }, 2);
                 if (parameterParts.Length == 2)
                 {
                     var name = parameterParts[0];
                     var value = WebUtility.UrlDecode(parameterParts[1]);
-                    if (!FormData.ContainsKey(name))
+                    if (!output.ContainsKey(name))
                     {
-                        FormData.Add(name, value);
+                        output.Add(name, value);
                     }
                 }
             }
         }
 
         public string Path { get; set; }
+
+        public string QueryString { get; set; }
 
         public HttpMethod Method { get; set; }
 
@@ -106,6 +126,8 @@ namespace SUS.HTTP
         public ICollection<Cookie> Cookies { get; set; }
 
         public Dictionary<string, string> FormData { get; set; }
+
+        public Dictionary<string, string> QueryData { get; set; }
 
         public Dictionary<string, string> Session { get; set; }
 

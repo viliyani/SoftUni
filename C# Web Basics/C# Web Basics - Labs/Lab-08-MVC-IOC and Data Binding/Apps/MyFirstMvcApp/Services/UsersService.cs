@@ -1,5 +1,8 @@
 ﻿using MyFirstMvcApp.Data;
+using SUS.MvcFramework;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace MyFirstMvcApp.Services
 {
@@ -7,14 +10,32 @@ namespace MyFirstMvcApp.Services
     {
         private ApplicationDbContext db;
 
-        public UsersService()
+        public UsersService(ApplicationDbContext db)
         {
-            db = new ApplicationDbContext();
+            this.db = db;
         }
 
-        public void CreateUser(string username, string email, string password)
+        public string CreateUser(string username, string email, string password)
         {
-            throw new System.NotImplementedException();
+            var user = new User
+            {
+                Username = username,
+                Email = email,
+                Role = IdentityRole.User,
+                Password = ComputeHash(password)
+            };
+
+            db.Users.Add(user);
+            db.SaveChanges();
+
+            return user.Id;
+        }
+
+        public string GetUserId(string username, string password)
+        {
+            var user = db.Users.FirstOrDefault(x => x.Username == username && x.Password == ComputeHash(password));
+
+            return user?.Id;
         }
 
         public bool IsEmailAvailable(string email)
@@ -27,27 +48,16 @@ namespace MyFirstMvcApp.Services
             return !db.Users.Any(x => x.Username == username);
         }
 
-        public bool IsUserValid(string username, string password)
+        public static string ComputeHash(string input)
         {
-            throw new System.NotImplementedException();
+            var bytes = Encoding.UTF8.GetBytes(input);
+            using var hash = SHA512.Create();
+            var hashedInputBytes = hash.ComputeHash(bytes);
+
+            var hashedInputStringBuilder = new System.Text.StringBuilder(128);
+            foreach (var b in hashedInputBytes)
+                hashedInputStringBuilder.Append(b.ToString("X2"));
+            return hashedInputStringBuilder.ToString();
         }
-
-
-        // --- 1:06:30
-        //public static string SHA512(string input)
-        //{
-        //    var bytes = System.Text.Encoding.UTF8.GetBytes(input);
-        //    using (var hash = System.Security.Cryptography.SHA512.Create())
-        //    {
-        //        var hashedInputBytes = hash.ComputeHash(bytes);
-
-        //        // Convert to text
-        //        // StringBuilder Capacity is 128, because 512 bits / 8 bits in byte * 2 symbols for byte 
-        //        var hashedInputStringBuilder = new System.Text.StringBuilder(128);
-        //        foreach (var b in hashedInputBytes)
-        //            hashedInputStringBuilder.Append(b.ToString("X2"));
-        //        return hashedInputStringBuilder.ToString();
-        //    }
-        //}
     }
 }

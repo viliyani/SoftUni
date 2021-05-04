@@ -1,5 +1,5 @@
 ﻿using MyFirstMvcApp.Data;
-using MyFirstMvcApp.ViewModels;
+using MyFirstMvcApp.ViewModels.Cards;
 using SUS.HTTP;
 using SUS.MvcFramework;
 using System.Linq;
@@ -8,37 +8,52 @@ namespace MyFirstMvcApp.Controllers
 {
     public class CardsController : Controller
     {
+        private readonly ApplicationDbContext db;
+
+        public CardsController(ApplicationDbContext db)
+        {
+            this.db = db;
+        }
+
         public HttpResponse Add()
         {
+            if (!IsUserSignedIn())
+            {
+                return Redirect("/users/login");
+            } 
+
             return View();
         }
 
         [HttpPost("/cards/add")]
-        public HttpResponse DoAdd()
+        public HttpResponse DoAdd(AddCardInputModel model)
         {
-            var db = new ApplicationDbContext();
+            if (!IsUserSignedIn())
+            {
+                return Redirect("/users/login");
+            }
 
-            if (Request.FormData["name"].Length < 5)
+            if (model.Name.Length < 5)
             {
                 return Error("Name should be at least 5 characters long.");
             }
 
             db.Cards.Add(new Card
             {
-                Attack = int.Parse(Request.FormData["attack"]),
-                Health = int.Parse(Request.FormData["health"]),
-                Description = Request.FormData["description"],
-                Name = Request.FormData["name"],
-                ImageUrl = Request.FormData["image"],
-                Keyword = Request.FormData["keyword"],
+                Attack = model.Attack,
+                Health = model.Health,
+                Description = model.Description,
+                Name = model.Name,
+                ImageUrl = model.Image,
+                Keyword = model.Keyword,
             });
 
             db.SaveChanges();
 
             var viewModel = new DoAddViewModel
             {
-                Attack = int.Parse(Request.FormData["attack"]),
-                Health = int.Parse(Request.FormData["health"]),
+                Attack = model.Attack,
+                Health = model.Health,
             };
 
             return View(viewModel);
@@ -46,6 +61,11 @@ namespace MyFirstMvcApp.Controllers
 
         public HttpResponse All()
         {
+            if (!IsUserSignedIn())
+            {
+                return Redirect("/users/login");
+            }
+
             var db = new ApplicationDbContext();
 
             var cardsViewModel = db
@@ -66,6 +86,11 @@ namespace MyFirstMvcApp.Controllers
 
         public HttpResponse Collection()
         {
+            if (!IsUserSignedIn())
+            {
+                return Redirect("/users/login");
+            }
+
             return View();
         }
     }
