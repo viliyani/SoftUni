@@ -1,0 +1,16 @@
+﻿@model MyAspNetCoreApp.ViewModels.Home.IndexViewModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+<div class="text-center">
+    <p>Year: @Model.Year</p>
+    <p>Users Count: @Model.UsersCount</p>
+    <p>Processors Count: @Model.ProcessorsCount</p>
+    <p>Name: @Model.Name</p>
+</div>
