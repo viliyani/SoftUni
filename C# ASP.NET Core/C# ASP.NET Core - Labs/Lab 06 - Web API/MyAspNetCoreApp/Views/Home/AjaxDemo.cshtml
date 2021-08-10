@@ -1,0 +1,29 @@
+﻿<h1>Hello Ajax!</h1>
+
+<table class="table table-sm table-striped">
+    <tr>
+        <td>User</td>
+        <td>Data</td>
+    </tr>
+    <tr>
+        <td>Test</td>
+        <td>2021</td>
+    </tr>
+</table>
+
+<button onclick="RefreshData()" class="btn btn-success">Refresh</button>
+
+
+<script>
+    function RefreshData() {
+        let xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                console.log(this.responseText);
+            }
+        };
+
+        xhr.open("GET", "/home/ajaxdemodata");
+        xhr.send();
+    }
+</script>
