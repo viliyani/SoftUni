@@ -1,0 +1,20 @@
+﻿@using MoiteRecepti.Common
+@model MoiteRecepti.Web.ViewModels.Home.IndexViewModel 
+@{
+    this.ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to @GlobalConstants.SystemName!</h1>
+    <p>
+        We have:
+        <div class="col-md-4 m-auto">
+            <ul class="list-group">
+                <li class="list-group-item">Recipes: @Model.RecipesCount</li>
+                <li class="list-group-item">Categories: @Model.CategoriesCount</li>
+                <li class="list-group-item">Ingredients: @Model.IngredientsCount</li>
+                <li class="list-group-item">Images: @Model.ImagesCount</li>
+            </ul>   
+        </div>
+    </p>
+</div>
