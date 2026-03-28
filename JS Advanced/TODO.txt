@@ -1,0 +1,32 @@
+Lab-01-Syntax and Functions
+    - всичко
+Lab-02-Arrays
+    - остават 10 и 11 задачи
+[v] Lab-03-Objects and Classes
+[v] Lab-04-DOM
+[v] Lab-05-DOM Manipulations
+Lab-06-Function Context
+    - всичко
+Lab-07-Advanced Functions
+    - 5, 6 и 7
+Lab-08-Object Composition
+    - всичко
+Lab-09-Prototypes and Inheritance
+    - всичко
+
+Exercise-01-Syntax and Functions
+    - всичко 
+Exercise-02-Arrays
+    - от 5 до 13 задачи
+Exercise-03-Objects and Classes
+    - всичко
+[v] Exercise-04-DOM
+[v] Exercise-05-DOM Manipulations
+Exercise-06-Function Context
+    - всичко
+Exercise-07-Advanced Functions
+    - всичко
+Exercise-08-Object Composition
+    - всичко
+Exercise-09-Prototypes and Inheritance
+    - всичко
