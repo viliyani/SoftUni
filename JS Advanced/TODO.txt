@@ -1,7 +1,7 @@
 Lab-01-Syntax and Functions
-    - всичко
-Lab-02-Arrays
-    - остават 10 и 11 задачи
+    - РЕШЕНИ - 1-3
+    - Общо - 10
+[v] Lab-02-Arrays
 [v] Lab-03-Objects and Classes
 [v] Lab-04-DOM
 [v] Lab-05-DOM Manipulations
