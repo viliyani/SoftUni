@@ -1,0 +1,15 @@
+function solve() {
+    const obj = {
+        extend(template) {
+            const proto = Object.getPrototypeOf(this);
+            for (const key in template) {
+                if (typeof template[key] === 'function') {
+                    proto[key] = template[key];
+                } else {
+                    this[key] = template[key];
+                }
+            }
+        }
+    };
+    return obj;
+}
